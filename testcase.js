@@ -1,4 +1,4 @@
-import { edge } from "./edge.js";
+import { edge } from "./pkg/common/edge.js";
 
 export var test1 = {
     "1":{

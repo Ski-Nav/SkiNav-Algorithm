@@ -1,5 +1,5 @@
-import { PriorityQueue } from "./priorityQueue.js";
-import { test1, test2 } from "./graph.js";
+import { PriorityQueue } from "../pkg/common/priorityQueue.js";
+import { test1, test2 } from "../testCase.js";
 
 /**
  * Removes runs that are not included in the chosen diffculties
