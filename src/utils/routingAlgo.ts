@@ -1,7 +1,8 @@
-import { PriorityQueue } from "../pkg/common/priorityQueue";
-import { testGraph1, testEdges, testNodes } from "../testFile";
-import { edge } from "../pkg/common/edge";
-import { node } from "../pkg/common/node";
+import { edge } from "../models/edge";
+import { node } from "../models/node";
+import { PriorityQueue } from "../models/priorityQueue";
+import { testNodes } from "../testFiles/testNode";
+import { testEdges } from "../testFiles/testEdge";
 
 /**
  * Removes runs that are not included in the chosen diffculties
@@ -81,7 +82,7 @@ const findShortestPath = (graph: { [fromId: string]: { [toId: string]: edge}},
 /**
  * Given a list of nodes, return a list of shortest path between each two consecutive nodes.
  */
-const findAllShortestPath = (graph: { [fromId:string]: { [toId:string]: edge}},
+export const findAllShortestPath = (graph: { [fromId:string]: { [toId:string]: edge}},
                              nodes: string[], 
                              difficulties: Set<number> = new Set([0,1,2,3])) => {
 	var startNode: any = nodes.shift(),
@@ -120,16 +121,5 @@ const findAllShortestPath = (graph: { [fromId:string]: { [toId:string]: edge}},
 
 
 
-// Testing 
-try{
-	console.log(findAllShortestPath(testGraph1, ["1", "11"], new Set([0,1,2,3])));
-	// console.log(findAllShortestPath(testGraph2, ["start", "end"], ));
-} catch(error){
-    let errorMessage: string = "Failed to do something exceptional";
-    if (error instanceof Error){
-        errorMessage = error.message;
-    }
-	console.error(errorMessage);
-}
 
 

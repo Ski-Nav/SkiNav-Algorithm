@@ -1,3 +1,9 @@
 # SkiNav-Algorithm
 
-main algorithm -> ./cmd/routingAlgo.ts
+findShortestPath algorithm is in ./src./utils/routingAlgo.ts
+
+```
+cd ./SkiNam-Algorithm/
+tsc
+node ./src/js/index.js
+```

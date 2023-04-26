@@ -1,5 +1,4 @@
-import { edge } from "./pkg/common/edge";
-import { node } from "./pkg/common/node";
+import { edge } from "../models/edge";
 export declare var testGraph1: {
     "1": {
         "2": edge;
@@ -66,10 +65,4 @@ export declare var testGraph2: {
         end: edge;
     };
     end: {};
-};
-export declare var testNodes: {
-    [nodeId: string]: node;
-};
-export declare var testEdges: {
-    [fromId: string]: edge;
 };

@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const priorityQueue_1 = require("../pkg/common/priorityQueue");
-const testFile_1 = require("../testFile");
+exports.findAllShortestPath = void 0;
+const priorityQueue_1 = require("../models/priorityQueue");
+const testNode_1 = require("../testFiles/testNode");
+const testEdge_1 = require("../testFiles/testEdge");
 /**
  * Removes runs that are not included in the chosen diffculties
  */
@@ -76,10 +78,10 @@ const findAllShortestPath = (graph, nodes, difficulties = new Set([0, 1, 2, 3]))
             throw new Error("cannot find route");
         }
         // record path from start to end
-        let shortestPath = [testFile_1.testNodes[endNode]];
+        let shortestPath = [testNode_1.testNodes[endNode]];
         let pre = predecessors[endNode]; // [fromNode, edgeName]
         while (pre) {
-            shortestPath.push(testFile_1.testEdges[pre[1]], testFile_1.testNodes[pre[0]]);
+            shortestPath.push(testEdge_1.testEdges[pre[1]], testNode_1.testNodes[pre[0]]);
             pre = predecessors[pre[0]];
         }
         shortestPath.reverse();
@@ -88,15 +90,4 @@ const findAllShortestPath = (graph, nodes, difficulties = new Set([0, 1, 2, 3]))
     }
     return allPath;
 };
-// Testing 
-try {
-    console.log(findAllShortestPath(testFile_1.testGraph1, ["1", "11"], new Set([0, 1, 2, 3])));
-    // console.log(findAllShortestPath(testGraph2, ["start", "end"], ));
-}
-catch (error) {
-    let errorMessage = "Failed to do something exceptional";
-    if (error instanceof Error) {
-        errorMessage = error.message;
-    }
-    console.error(errorMessage);
-}
+exports.findAllShortestPath = findAllShortestPath;
