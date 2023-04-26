@@ -7,14 +7,14 @@ export declare var testGraph1: {
     };
     "2": {
         "5": edge;
-        "10": edge;
+        "9": edge;
     };
     "3": {
-        "10": edge;
+        "9": edge;
     };
     "4": {
-        "10": edge;
-        "12": edge;
+        "9": edge;
+        "11": edge;
     };
     "5": {
         "6": edge;
@@ -26,20 +26,20 @@ export declare var testGraph1: {
     "7": {};
     "8": {
         "7": edge;
-        "11": edge;
+        "10": edge;
+    };
+    "9": {
+        "10": edge;
     };
     "10": {
-        "11": edge;
+        "4": edge;
+        "12": edge;
     };
     "11": {
-        "4": edge;
-        "13": edge;
+        "10": edge;
+        "12": edge;
     };
     "12": {
-        "11": edge;
-        "13": edge;
-    };
-    "13": {
         "1": edge;
     };
 };

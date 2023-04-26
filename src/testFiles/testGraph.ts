@@ -8,14 +8,14 @@ export var testGraph1 = {
     },
     "2":{
         "5": new edge("slope", 2, "d", 4),
-        "10": new edge("slope", 2, "e", 12),
+        "9": new edge("slope", 2, "e", 12),
     },
     "3":{
-        "10": new edge("slope", 2, "f", 9),
+        "9": new edge("slope", 2, "f", 9),
     },
     "4":{
-        "10": new edge("slope", 2, "g", 10),
-        "12": new edge("slope", 2, "h", 3),
+        "9": new edge("slope", 2, "g", 10),
+        "11": new edge("slope", 2, "h", 3),
     },
     "5":{
         "6": new edge("slope", 3, "i", 3),
@@ -27,20 +27,20 @@ export var testGraph1 = {
     "7":{},
     "8":{
         "7": new edge("slope", 2, "l", 2),
-        "11": new edge("slope", 1, "m", 3),
+        "10": new edge("slope", 1, "m", 3),
+    },
+    "9":{
+        "10": new edge("slope", 1, "n", 2),
     },
     "10":{
-        "11": new edge("slope", 1, "n", 2),
+        "4": new edge("slope", 0, "o", 30),
+        "12": new edge("slope", 1, "p", 15),
     },
     "11":{
-        "4": new edge("slope", 0, "o", 30),
-        "13": new edge("slope", 1, "p", 15),
+        "10": new edge("slope", 1, "q", 8),
+        "12": new edge("slope", 1, "r", 12),
     },
     "12":{
-        "11": new edge("slope", 1, "q", 8),
-        "13": new edge("slope", 1, "r", 12),
-    },
-    "13":{
         "1": new edge("lift", 0, "s", 50)
     }
 }
