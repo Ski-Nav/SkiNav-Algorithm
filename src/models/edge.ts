@@ -1,4 +1,4 @@
-export class edge {
+export class Edge {
     edgeType: string;
     difficulty: number;
     name: string;
@@ -9,5 +9,21 @@ export class edge {
         this.difficulty = difficulty;
         this.name = name;
         this.weight = weight;
+    }
+
+    getEdgeType(): string {
+        return this.edgeType;
+    }
+    
+    getDifficulty(): number {
+        return this.difficulty;
+    }
+    
+    getName(): string {
+        return this.name;
+    }
+    
+    getWeight(): number {
+        return this.weight;
     }
 }

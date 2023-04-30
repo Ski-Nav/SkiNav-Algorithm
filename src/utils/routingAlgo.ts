@@ -1,13 +1,12 @@
-import { edge } from "../models/edge";
-import { node } from "../models/node";
+import { Edge } from "../models/Edge"
+import { Node } from "../models/Node";
 import { PriorityQueue } from "../models/priorityQueue";
-import { testNodes } from "../testFiles/testNode";
-import { testEdges } from "../testFiles/testEdge";
+import { parseData } from "./parseData";
 
 /**
  * Removes runs that are not included in the chosen diffculties
  */
-const checkDifficulty = (graph: { [fromId: string]: { [toId: string]: edge}}, 
+const checkDifficulty = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
                          difficulties: Set<number>) => {
 	for (let fromNode in graph) {
 		for (let edge in graph[fromNode]) {
@@ -23,11 +22,11 @@ const checkDifficulty = (graph: { [fromId: string]: { [toId: string]: edge}},
 /**
  * Find the shortest path between the startNode and endNode
  */
-const findShortestPath = (graph: { [fromId: string]: { [toId: string]: edge}}, 
+const findShortestPath = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
                           startNode: string, 
                           endNode: string) => {
 	let weightsFromStart = new PriorityQueue(),
-		predecessors: { [toNode: string]: [string, string]} = {}, // {toNode: [fromNode, edgeName]}
+		predecessors: { [toNode: string]: [string, string]} = {}, // {toNode: [fromNode, EdgeName]}
 		visited = new Set([startNode]);
 
 	// establish object for recording weightsFromStart from the start node
@@ -35,7 +34,7 @@ const findShortestPath = (graph: { [fromId: string]: { [toId: string]: edge}},
 		weightsFromStart.add(node, graph[startNode][node].weight)
 	}
 
-	// track paths
+	// assign start as predecessor for the nodes pointed by start
 	predecessors[endNode] = ["", ""];
 	for (let child in graph[startNode]) {
 		predecessors[child] = [startNode, graph[startNode][child].name]; 
@@ -82,18 +81,23 @@ const findShortestPath = (graph: { [fromId: string]: { [toId: string]: edge}},
 /**
  * Given a list of nodes, return a list of shortest path between each two consecutive nodes.
  */
-export const findAllShortestPath = (graph: { [fromId:string]: { [toId:string]: edge}},
-                             nodes: string[], 
-                             difficulties: Set<number> = new Set([0,1,2,3])) => {
-	var startNode: any = nodes.shift(),
+export const findAllShortestPath = (resortName: string,
+							stops: string[], 
+							difficulties: Set<number> = new Set([0,1,2,3])) => {
+	var startNode: any = stops.shift(),
 		endNode: any,
 		predecessors: { [toNode: string]: [string, string]} = {},
-		allPath: any[][] = [];
+		allPath: any[][] = [],
+		graph: {[fromId:string]: {[toId:string]: Edge}},
+		nodes: {[nodeId: string]: Node},
+		edges: {[edgeName: string]: Edge},
 	
+	[graph, nodes, edges] = parseData(resortName);
+
 	graph = checkDifficulty(graph, difficulties);
 
-	while (nodes.length) {
-		endNode = nodes.shift();
+	while (stops.length) {
+		endNode = stops.shift();
 		predecessors = findShortestPath(graph, startNode, endNode);
 
 		// return error if can't find route
@@ -102,10 +106,10 @@ export const findAllShortestPath = (graph: { [fromId:string]: { [toId:string]: e
 		}
 
 		// record path from start to end
-		let shortestPath: (edge|node)[] = [testNodes[endNode]];
-		let pre = predecessors[endNode]; // [fromNode, edgeName]
+		let shortestPath: (Edge|Node)[] = [nodes[endNode]];
+		let pre = predecessors[endNode]; // [fromNode, EdgeName]
 		while (pre) {
-			shortestPath.push(testEdges[pre[1]], testNodes[pre[0]]);
+			shortestPath.push(edges[pre[1]], nodes[pre[0]]);
 			pre = predecessors[pre[0]];
 		}
 		shortestPath.reverse();
