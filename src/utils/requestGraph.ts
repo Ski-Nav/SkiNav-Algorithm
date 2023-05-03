@@ -10,3 +10,5 @@ export async function requestGraph(resortName: string) {
     let fileName = __dirname.concat('/../data/json/', resortName, '_graph.json');
     fs.writeFileSync(fileName, jsonData);
 }
+
+requestGraph('UCSD');
