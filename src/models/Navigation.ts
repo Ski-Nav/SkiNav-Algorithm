@@ -26,8 +26,6 @@ export class Navigation{
         return this.edges;
     }
 
-
-
     /**
      * request graph from our server via api, then parse it into graph, nodes, and edges."
      */

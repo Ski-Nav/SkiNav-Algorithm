@@ -1,4 +1,3 @@
-import { findAllShortestPath } from "./src/utils/routingAlgo";
 import { Navigation } from "./src/models/Navigation";
 
 try {
@@ -9,7 +8,6 @@ try {
         console.log(start, end);
         console.log(nav.findAllShortestPath([start, end], new Set([0,1])));
         console.log(nav.findAllShortestPath([start, end], new Set([0,1,2])));
-        console.log(nav.getGraph());
     });
 } catch (error) {
     let errorMessage: string = "Failed to do something exceptional";
