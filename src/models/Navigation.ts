@@ -58,7 +58,7 @@ export class Navigation{
         })
     }
 
-    #dist(x: [number, number], y: [number, number]): number{
+    _dist(x: [number, number], y: [number, number]): number{
         let d = (x[0]-y[0])**2 + (x[1]-y[1])**2;
         return d
     }
@@ -71,7 +71,7 @@ export class Navigation{
             minDist: number = Infinity;
         
         for (let n in this.nodes) {
-            let curDist = this.#dist([lati, long], [this.nodes[n].getLatitude(), this.nodes[n].getLongitude()]);
+            let curDist = this._dist([lati, long], [this.nodes[n].getLatitude(), this.nodes[n].getLongitude()]);
             if (curDist < minDist){
                 minDist = curDist;
                 ClosestNode = n;
@@ -84,7 +84,7 @@ export class Navigation{
     /**
      * Removes runs that are not included in the chosen diffculties
      */
-    #checkDifficulty = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
+    _checkDifficulty = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
                         difficulties: Set<number>) => {
         let newGraph = cloneDeep(graph);        
         for (let fromNode in newGraph) {
@@ -101,7 +101,7 @@ export class Navigation{
     /**
     * Find the shortest path between the startNode and endNode
     */
-    #findShortestPath = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
+    _findShortestPath = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
                          startNode: string, 
                          endNode: string) => {
         let weightsFromStart = new PriorityQueue(),
@@ -166,11 +166,11 @@ export class Navigation{
             predecessors: { [toNode: string]: [string, string]} = {},
             allPath: (Edge|Node)[][] = [],
 
-        graph = this.#checkDifficulty(this.graph, difficulties);
+        graph = this._checkDifficulty(this.graph, difficulties);
 
         while (stops.length) {
             endNode = stops.shift();
-            predecessors = this.#findShortestPath(graph, startNode, endNode);
+            predecessors = this._findShortestPath(graph, startNode, endNode);
 
             // return error if can't find route
             if (!predecessors[endNode]) {
