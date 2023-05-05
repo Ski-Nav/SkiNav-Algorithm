@@ -39,6 +39,7 @@ export class Navigation{
         this.edges = {};
         
         Object.entries(graphJson["vertices"]).forEach(([_, v]) => {
+            console.log(v);
             let vertex = v as any;
             let vertexId: string = vertex["id"].toString();
     
@@ -47,7 +48,7 @@ export class Navigation{
             Object.entries(vertex["edges"]).forEach(([_, e]) => {
                 let edge = e as any;
     
-                this.edges[edge["name"]] = new Edge(edge["edgeType"], edge["difficulty"], edge["name"], edge["weight"]);   
+                this.edges[edge["name"]] = new Edge(edge["edgeType"], edge["difficulty"], edge["name"], vertexId, edge["to"].toString(), edge["weight"]);   
                 
                 if (!this.graph[vertexId]) {
                     this.graph[vertexId] = {};

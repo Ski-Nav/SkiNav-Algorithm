@@ -3,7 +3,7 @@ import { Navigation } from "./src/models/Navigation";
 try {
     const nav = new Navigation();
     nav.requestGraph("UCSD").then(()=>{
-        console.log(nav.getNodes());
+        console.log(nav.getEdges());
         const start = nav.getClosestNode(32.88122718312019, -117.23757547573618);
         const end = nav.getClosestNode(32.879347457165174, -117.23725798289574);
         console.log(start, end);
