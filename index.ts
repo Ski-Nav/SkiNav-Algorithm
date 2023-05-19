@@ -9,7 +9,7 @@ nav.requestGraph("mammoth").then(()=>{
     console.log(nav.getNodes()[start.toString()])
     console.log(nav.getNodes()[end.toString()])
     try{
-       console.log(nav.findAllShortestPath([start, end], new Set([1,2,3,4,5])))
+       console.log(nav.findAllShortestPath([start, end], new Set([1,2,3])))
     } catch (error) {
         let errorMessage: string = "Failed to do something exceptional";
         if (error instanceof Error){

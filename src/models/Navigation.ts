@@ -16,10 +16,10 @@ export class Navigation{
         this.diff_map = {
             "": 1,
             "novice": 1,
-            "easy": 2,
-            "intermediate": 3,
-            "advanced": 4,
-            "expert": 5,
+            "easy": 1,
+            "intermediate": 2,
+            "advanced": 3,
+            "expert": 3,
         }
     };
     
