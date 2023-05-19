@@ -7,11 +7,20 @@ export class Navigation{
     graph: {[fromId: string]: {[toId: string]: Edge}};
     nodes: {[id: string]: Node};
     edges: {[name: string]: Edge};
+    diff_map: {[diff: string]: number};
 
     constructor(){
         this.graph = {}
         this.nodes = {};
         this.edges = {};
+        this.diff_map = {
+            "": 1,
+            "novice": 1,
+            "easy": 2,
+            "intermediate": 3,
+            "advanced": 4,
+            "expert": 5,
+        }
     };
     
     getGraph() {
@@ -39,7 +48,6 @@ export class Navigation{
         this.edges = {};
         
         Object.entries(graphJson["vertices"]).forEach(([_, v]) => {
-            console.log(v);
             let vertex = v as any;
             let vertexId: string = vertex["id"].toString();
     
@@ -47,8 +55,13 @@ export class Navigation{
             
             Object.entries(vertex["edges"]).forEach(([_, e]) => {
                 let edge = e as any;
-    
-                this.edges[edge["name"]] = new Edge(edge["edgeType"], edge["difficulty"], edge["name"], vertexId, edge["to"].toString(), edge["weight"]);   
+
+                if(edge["edgeType"] == "SLOPE") {
+                    this.edges[edge["name"]] = new Edge(edge["edgeType"], this.diff_map[edge["difficulty"]], edge["name"], vertexId, edge["to"].toString(), edge["weight"]);   
+                } 
+                if(edge["edgeType"] == "LIFT") {
+                    this.edges[edge["name"]] = new Edge(edge["edgeType"], 0, edge["name"], vertexId, edge["to"].toString(), edge["weight"]);   
+                }
                 
                 if (!this.graph[vertexId]) {
                     this.graph[vertexId] = {};
@@ -161,21 +174,23 @@ export class Navigation{
      * Given a list of nodes, return a list of shortest path between each two consecutive nodes.
      */
     findAllShortestPath = (stops: string[], 
-                           difficulties: Set<number> = new Set([0,1,2,3])) => {
+                           difficulties: Set<number> = new Set([1,2,3])) => {
+        
         var startNode: any = stops.shift(),
             endNode: any,
             predecessors: { [toNode: string]: [string, string]} = {},
-            allPath: (Edge|Node)[][] = [],
+            allPath: (Edge|Node)[][] = [];
 
-        graph = this._checkDifficulty(this.graph, difficulties);
+        difficulties.add(0);
+        var graph = this._checkDifficulty(this.graph, difficulties);
 
         while (stops.length) {
             endNode = stops.shift();
             predecessors = this._findShortestPath(graph, startNode, endNode);
 
             // return error if can't find route
-            if (!predecessors[endNode]) {
-                throw new Error("cannot find route");
+            if (predecessors[endNode][0] == "" && predecessors[endNode][1] == "") {
+                throw new Error("Cannot find route");
             }
 
             // record path from start to end
