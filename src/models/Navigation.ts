@@ -1,6 +1,8 @@
 import { Node } from "./Node";
 import { Edge } from "./Edge";
 import { PriorityQueue } from "./priorityQueue";
+import { trailStatusUrls } from "./../cfg/trailStatusUrls";
+import fs from 'fs';
 var cloneDeep = require('lodash.clonedeep');
 
 export class Navigation{
@@ -8,6 +10,7 @@ export class Navigation{
     nodes: {[id: string]: Node};
     edges: {[name: string]: Edge};
     diff_map: {[diff: string]: number};
+    resortName: string;
 
     constructor(){
         this.graph = {}
@@ -21,6 +24,7 @@ export class Navigation{
             "advanced": 3,
             "expert": 3,
         }
+        this.resortName = "";
     };
     
     getGraph() {
@@ -39,6 +43,7 @@ export class Navigation{
      * request graph from our server via api, then parse it into graph, nodes, and edges."
      */
     async requestGraph(graphName: string) {
+        this.resortName = graphName;
         const url = "http://ec2-18-222-140-238.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
         const response = await fetch(url);
         const graphJson = await response.json();
@@ -51,10 +56,11 @@ export class Navigation{
             let vertex = v as any;
             let vertexId: string = vertex["id"].toString();
     
-            this.nodes[vertexId] = new Node(Number(vertex["latitude"]), Number(vertex["longitude"]));
+            this.nodes[vertexId] = new Node(vertexId, Number(vertex["latitude"]), Number(vertex["longitude"]));
             
             Object.entries(vertex["edges"]).forEach(([_, e]) => {
                 let edge = e as any;
+                edge["name"] = edge["name"].replace(/[()']/g, "");
 
                 if(edge["edgeType"] == "SLOPE") {
                     this.edges[edge["name"]] = new Edge(edge["edgeType"], this.diff_map[edge["difficulty"]], edge["name"], vertexId, edge["to"].toString(), edge["weight"]);   
@@ -96,14 +102,14 @@ export class Navigation{
     }
 
     /**
-     * Removes runs that are not included in the chosen diffculties
+     * Removes runs that are not included in the chosen diffculties or those that are not open.
      */
-    _checkDifficulty = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
-                        difficulties: Set<number>) => {
+    _checkDifficultyAndStatus (graph: { [fromId: string]: { [toId: string]: Edge}}, 
+                               difficulties: Set<number>) { 
         let newGraph = cloneDeep(graph);        
         for (let fromNode in newGraph) {
             for (let edge in newGraph[fromNode]) {
-                if (!difficulties.has(newGraph[fromNode][edge].difficulty)) {
+                if (!difficulties.has(newGraph[fromNode][edge].difficulty) || newGraph[fromNode][edge].status != "open") {
                     delete newGraph[fromNode][edge];
                 }
             }
@@ -115,9 +121,9 @@ export class Navigation{
     /**
     * Find the shortest path between the startNode and endNode
     */
-    _findShortestPath = (graph: { [fromId: string]: { [toId: string]: Edge}}, 
-                         startNode: string, 
-                         endNode: string) => {
+    _findShortestPath (graph: { [fromId: string]: { [toId: string]: Edge}}, 
+                       startNode: string, 
+                       endNode: string) {
         let weightsFromStart = new PriorityQueue(),
         predecessors: { [toNode: string]: [string, string]} = {}, // {toNode: [fromNode, EdgeName]}
         visited = new Set([startNode]);
@@ -173,16 +179,17 @@ export class Navigation{
     /**
      * Given a list of nodes, return a list of shortest path between each two consecutive nodes.
      */
-    findAllShortestPath = (stops: string[], 
-                           difficulties: Set<number> = new Set([1,2,3])) => {
+    async findAllShortestPath(stops: string[], 
+                              difficulties: Set<number> = new Set([1,2,3])) {
+        difficulties.add(0);
         
         var startNode: any = stops.shift(),
             endNode: any,
             predecessors: { [toNode: string]: [string, string]} = {},
             allPath: (Edge|Node)[][] = [];
 
-        difficulties.add(0);
-        var graph = this._checkDifficulty(this.graph, difficulties);
+        await this.updateEdgesStatus();
+        var graph = this._checkDifficultyAndStatus(this.graph, difficulties);
 
         while (stops.length) {
             endNode = stops.shift();
@@ -208,4 +215,41 @@ export class Navigation{
 
         return allPath;
     };
+
+    /**
+     * Check and Update the availability of the slope and lifts
+     * Runs every time before invoking findAllShortestPath()
+     */
+    async updateEdgesStatus() {
+        const url: string = trailStatusUrls[this.resortName];
+        const response = await fetch(url);
+        const responseJson = await response.json();
+
+        const mountainAreas = responseJson["MountainAreas"];
+        for (let i in mountainAreas) {
+            const mountainArea = mountainAreas[i];
+            const trails = mountainArea["Trails"];
+            const lifts = mountainArea["Lifts"];
+            const edges = trails.concat(lifts);
+
+            for (let j in edges) {
+                const edge = edges[j];
+
+                var edgeName: string = edge["Name"];
+                edgeName = edgeName.replace(/[()']/g, "");
+
+                if (edgeName in this.edges) {
+                    if (edge["StatusId"] === 0) {
+                        this.edges[edgeName].status = "open";
+                    } else {
+                        this.edges[edgeName].status = "close";
+                    } 
+                }
+            }
+        }
+
+        // TODO: some runs have different names from the mammoth website, hence they are not took into considered, needs to fix somehow.
+        // e.g. (High 5, High Five), (Easy Over, Over Easy), (Saint Anton, St, Anton)
+    }
+
 }

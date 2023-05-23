@@ -1,15 +1,16 @@
 import { Navigation } from "./src/models/Navigation";
 
 // Usage
-const nav = new Navigation();
-nav.requestGraph("mammoth").then(()=>{
-    // console.log(nav.getEdges())
-    const start = nav.getClosestNode(37.6336275, -119.0291459);
-    const end = nav.getClosestNode(37.6418128, -119.0248050);
-    console.log(nav.getNodes()[start.toString()])
-    console.log(nav.getNodes()[end.toString()])
+async function foo() {
+    const nav = new Navigation();
+    await nav.requestGraph("mammoth");
+    
+    const start = nav.getClosestNode(37.6436286, -119.0150186);
+    const end = nav.getClosestNode(37.6441982, -119.0060669);
+    console.log("Start node: ", nav.getNodes()[start.toString()])
+    console.log("End node: ",nav.getNodes()[end.toString()])
     try{
-       console.log(nav.findAllShortestPath([start, end], new Set([1,2,3])))
+       console.log(await nav.findAllShortestPath([start, end], new Set([1,2,3])))
     } catch (error) {
         let errorMessage: string = "Failed to do something exceptional";
         if (error instanceof Error){
@@ -17,4 +18,7 @@ nav.requestGraph("mammoth").then(()=>{
         }
         console.error(errorMessage);
     }
-})
+
+}
+
+foo();
