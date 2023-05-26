@@ -41,7 +41,7 @@ export class Navigation{
     }
 
     getEdges() {
-        fs.writeFileSync("edges.json", JSON.stringify(this.edges));
+        // fs.writeFileSync("edges.json", JSON.stringify(this.edges));
         return this.edges;
     }
 
@@ -65,7 +65,6 @@ export class Navigation{
         const url = "http://ec2-18-222-140-238.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
         const response = await fetch(url);
         const graphJson = await response.json();
-        fs.writeFileSync("./response.json", JSON.stringify(graphJson));
     
         this.graph = {};
         this.nodes = {};

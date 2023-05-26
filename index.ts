@@ -5,7 +5,6 @@ async function foo() {
     const nav = new Navigation();
     await nav.requestGraph("Mammoth");
     await nav.updateEdgesStatus();
-    console.log(nav.getSearchableNodes());
     // const start = nav.getClosestNode(37.6436286, -119.0150186);
     // const end = nav.getClosestNode(37.6441982, -119.0060669);
     // console.log("Start node: ", nav.getNodes()[start.toString()])
