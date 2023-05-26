@@ -5,6 +5,11 @@ import { trailStatusUrls } from "./../cfg/trailStatusUrls";
 import fs from 'fs';
 var cloneDeep = require('lodash.clonedeep');
 
+interface Alias {
+    name: string;
+    node: Node;
+}
+
 export class Navigation{
     graph: {[fromId: string]: {[toId: string]: Edge}};
     nodes: {[id: string]: Node};
@@ -36,7 +41,20 @@ export class Navigation{
     }
 
     getEdges() {
+        fs.writeFileSync("edges.json", JSON.stringify(this.edges));
         return this.edges;
+    }
+
+    
+    getSearchableNodes(): Alias[] {
+        var searchableNodes: Alias[] = [];
+        for (let nodeId in this.nodes) {
+            const aliases = this.nodes[nodeId]["aliases"];
+            for (let i in aliases) {
+                searchableNodes.push({name: aliases[i], node: this.nodes[nodeId]});
+            }
+        }
+        return searchableNodes;
     }
 
     /**
@@ -47,6 +65,7 @@ export class Navigation{
         const url = "http://ec2-18-222-140-238.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
         const response = await fetch(url);
         const graphJson = await response.json();
+        fs.writeFileSync("./response.json", JSON.stringify(graphJson));
     
         this.graph = {};
         this.nodes = {};
@@ -56,7 +75,7 @@ export class Navigation{
             let vertex = v as any;
             let vertexId: string = vertex["id"].toString();
     
-            this.nodes[vertexId] = new Node(vertexId, Number(vertex["latitude"]), Number(vertex["longitude"]));
+            this.nodes[vertexId] = new Node(vertexId, Number(vertex["latitude"]), Number(vertex["longitude"]), vertex["aliases"]);
             
             Object.entries(vertex["edges"]).forEach(([_, e]) => {
                 let edge = e as any;
@@ -188,6 +207,7 @@ export class Navigation{
             predecessors: { [toNode: string]: [string, string]} = {},
             allPath: (Edge|Node)[][] = [];
 
+        // Check edges status everytime before routing.
         await this.updateEdgesStatus();
         var graph = this._checkDifficultyAndStatus(this.graph, difficulties);
 
@@ -218,7 +238,7 @@ export class Navigation{
 
     /**
      * Check and Update the availability of the slope and lifts
-     * Runs every time before invoking findAllShortestPath()
+     * Runs every time when invoking findAllShortestPath()
      */
     async updateEdgesStatus() {
         const url: string = trailStatusUrls[this.resortName];
