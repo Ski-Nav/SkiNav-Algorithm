@@ -33,17 +33,17 @@ export class Navigation{
     };
     
     getGraph() {
-        fs.writeFileSync("graph.json", JSON.stringify(this.graph));
+        // fs.writeFileSync("graph.json", JSON.stringify(this.graph));
         return this.graph;
     }
 
     getNodes() {
-        fs.writeFileSync("nodes.json", JSON.stringify(this.nodes));
+        // fs.writeFileSync("nodes.json", JSON.stringify(this.nodes));
         return this.nodes;
     }
 
     getEdges() {
-        fs.writeFileSync("edges.json", JSON.stringify(this.edges));
+        // fs.writeFileSync("edges.json", JSON.stringify(this.edges));
         return this.edges;
     }
 
@@ -67,7 +67,7 @@ export class Navigation{
         const url = "http://ec2-18-222-140-238.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
         const response = await fetch(url);
         const graphJson = await response.json();
-        fs.writeFileSync("response.json", JSON.stringify(graphJson));
+
         this.graph = {};
         this.nodes = {};
         this.edges = {};
@@ -243,6 +243,9 @@ export class Navigation{
      * Runs every time when invoking findAllShortestPath()
      */
     async updateEdgesStatus() {
+        if (this.resortName === "UCSD") {
+            return
+        }
         const url: string = trailStatusUrls[this.resortName];
         const response = await fetch(url);
         const responseJson = await response.json();
