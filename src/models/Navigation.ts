@@ -33,21 +33,20 @@ export class Navigation{
     };
     
     getGraph() {
-        // fs.writeFileSync("graph.json", JSON.stringify(this.graph));
         return this.graph;
     }
 
     getNodes() {
-        // fs.writeFileSync("nodes.json", JSON.stringify(this.nodes));
         return this.nodes;
     }
 
     getEdges() {
-        // fs.writeFileSync("edges.json", JSON.stringify(this.edges));
         return this.edges;
     }
 
-    
+    /**
+     * Returns a list of objects that maps alias to node.
+     */
     getSearchableNodes(): Alias[] {
         var searchableNodes: Alias[] = [];
         for (let nodeId in this.nodes) {
@@ -60,7 +59,7 @@ export class Navigation{
     }
 
     /**
-     * request graph from our server via api, then parse it into graph, nodes, and edges."
+     * Request graph from our server via api, then parse it into graph, nodes, and edges."
      */
     async requestGraph(graphName: string) {
         this.resortName = graphName;
@@ -273,7 +272,7 @@ export class Navigation{
             }
         }
 
-        // TODO: some runs have different names from the mammoth website, hence they are not took into considered, needs to fix somehow.
+        // TODO: some runs have different names between Openstreetmap and Mammoth website, hence they are not took into considered, needs to somehow fix it.
         // e.g. (High 5, High Five), (Easy Over, Over Easy), (Saint Anton, St, Anton)
     }
 
