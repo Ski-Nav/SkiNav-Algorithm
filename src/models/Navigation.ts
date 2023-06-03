@@ -33,14 +33,17 @@ export class Navigation{
     };
     
     getGraph() {
+        // fs.writeFileSync("graph.json", JSON.stringify(this.graph));
         return this.graph;
     }
 
     getNodes() {
+        fs.writeFileSync("nodes.json", JSON.stringify(this.nodes));
         return this.nodes;
     }
 
     getEdges() {
+        // fs.writeFileSync("edges.json", JSON.stringify(this.edges));
         return this.edges;
     }
 
@@ -51,6 +54,7 @@ export class Navigation{
         var searchableNodes: Alias[] = [];
         for (let nodeId in this.nodes) {
             const aliases = this.nodes[nodeId]["aliases"];
+
             for (let i in aliases) {
                 searchableNodes.push({name: aliases[i], node: this.nodes[nodeId]});
             }
@@ -63,10 +67,10 @@ export class Navigation{
      */
     async requestGraph(graphName: string) {
         this.resortName = graphName;
-        const url = "http://ec2-18-222-140-238.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
+        const url = "http://ec2-18-188-212-45.us-east-2.compute.amazonaws.com:3000/api/v1/maps/".concat(graphName);
         const response = await fetch(url);
         const graphJson = await response.json();
-
+        // fs.writeFileSync("response.json", JSON.stringify(graphJson));
         this.graph = {};
         this.nodes = {};
         this.edges = {};
@@ -86,14 +90,13 @@ export class Navigation{
                 } else if(edge["edgeType"] === "LIFT") {
                     this.edges[edge["id"]] = new Edge(edge["edgeType"], 0, edge["name"], edge["id"], vertexId, edge["to"].toString(), edge["weight"]);   
                 } else {
-                    console.log(edge["edgeType"]);
+                    console.log("Edge not slope or lift, edge type = ", edge["edgeType"]);
                 }
                 
                 if (!this.graph[vertexId]) {
                     this.graph[vertexId] = {};
                 }
                 this.graph[vertexId][edge["to"].toString()] = this.edges[edge["id"]];
-    
             })
         })
     }
@@ -145,7 +148,7 @@ export class Navigation{
                        startNode: string, 
                        endNode: string) {
         let weightsFromStart = new PriorityQueue(),
-        predecessors: { [toNode: string]: [string, string]} = {}, // {toNode: [fromNode, EdgeName]}
+        predecessors: { [toNode: string]: [string, string]} = {}, // {toNode: [fromNodeId, EdgeId]}
         visited = new Set([startNode]);
 
         // establish object for recording weightsFromStart from the start node
@@ -156,7 +159,7 @@ export class Navigation{
         // assign start as predecessor for the nodes pointed by start
         predecessors[endNode] = ["", ""];
         for (let child in graph[startNode]) {
-            predecessors[child] = [startNode, graph[startNode][child].id]; 
+            predecessors[child] = [startNode, graph[startNode][child].edgeId]; 
         }
 
         // find the nearest node ([nodeId, weight])
@@ -180,11 +183,11 @@ export class Navigation{
 
                     if (!weightsFromStart.hasNode(childId)){
                         weightsFromStart.add(childId, newWeight);
-                        predecessors[childId] = [node[0], graph[node[0]][childId].id];
+                        predecessors[childId] = [node[0], graph[node[0]][childId].edgeId];
                     } 
                     else if (weightsFromStart.getWeight(childId) > newWeight) {
                         weightsFromStart.decreaseValue(childId, newWeight);
-                        predecessors[childId] = [node[0], graph[node[0]][childId].id];
+                        predecessors[childId] = [node[0], graph[node[0]][childId].edgeId];
                     } 
                 }
             }
@@ -208,8 +211,10 @@ export class Navigation{
             predecessors: { [toNode: string]: [string, string]} = {},
             allPath: (Edge|Node)[][] = [];
 
-        // Check edges status everytime before routing.
+        // Update edges status everytime before routing.
         await this.updateEdgesStatus();
+    
+        // Filter out closed edges and unselected difficulties
         var graph = this._checkDifficultyAndStatus(this.graph, difficulties);
 
         while (stops.length) {
@@ -223,7 +228,7 @@ export class Navigation{
 
             // record path from start to end
             let shortestPath: (Edge|Node)[] = [this.nodes[endNode]];
-            let pre = predecessors[endNode]; // [fromNode, EdgeId]
+            let pre = predecessors[endNode]; // [fromNodeId, EdgeId]
             while (pre) {
                 shortestPath.push(this.edges[pre[1]], this.nodes[pre[0]]);
                 pre = predecessors[pre[0]];
@@ -242,12 +247,19 @@ export class Navigation{
      * Runs every time when invoking findAllShortestPath()
      */
     async updateEdgesStatus() {
-        if (this.resortName === "UCSD") {
-            return
-        }
-        const url: string = trailStatusUrls[this.resortName];
-        const response = await fetch(url);
-        const responseJson = await response.json();
+        var responseJson: any;
+        try {
+            const url: string = trailStatusUrls[this.resortName];
+            const response = await fetch(url);
+            responseJson = await response.json();
+        } catch (err) {
+            let errorMessage: string = "Failed while updating edges status";
+            if (err instanceof Error){
+                errorMessage = err.message;
+            }
+            console.error(errorMessage);
+            return;
+        } 
 
         const mountainAreas = responseJson["MountainAreas"];
         for (let i in mountainAreas) {
@@ -259,15 +271,18 @@ export class Navigation{
             for (let j in edges) {
                 const edge = edges[j];
 
-                var edgeId: string = edge["id"];
-                // edgeName = edgeName.replace(/[()']/g, "");
-
-                if (edgeId in this.edges) {
-                    if (edge["StatusId"] === 0) {
-                        this.edges[edgeId].status = "open";
-                    } else {
-                        this.edges[edgeId].status = "close";
-                    } 
+                // var edgeId: string = edge["id"];
+                var edgeName: string = edge["Name"];
+                edgeName = edgeName.replace(/[()']/g, "");
+                
+                for (let k in this.edges) {
+                    if (edgeName === this.edges[k]["edgeName"]) {
+                        if (edge["StatusId"] === 0) {
+                            this.edges[k].status = "open";
+                        } else {
+                            this.edges[k].status = "close";
+                        } 
+                    }
                 }
             }
         }
