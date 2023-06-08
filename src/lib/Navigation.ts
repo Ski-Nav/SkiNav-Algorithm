@@ -1,7 +1,7 @@
 import { Node } from "./Node";
 import { Edge } from "./Edge";
-import { PriorityQueue } from "./priorityQueue";
-import { trailStatusUrls } from "./../cfg/trailStatusUrls";
+import { PriorityQueue } from "../util/priorityQueue";
+import { trailStatusUrls } from "../cfg/trailStatusUrls";
 import fs from 'fs';
 var cloneDeep = require('lodash.clonedeep');
 
